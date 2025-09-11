@@ -2,8 +2,8 @@ from fastapi import FastAPI, File, UploadFile
 #import FastAPI: class for creating app instance that we will add routes to
 import os 
 import librosa
-from moviepy.editor import VideoFileClip
-from audio import extract_audio
+from moviepy import VideoFileClip
+from audio import extract_audio, find_peaks
 from pathlib import Path
 
 app = FastAPI() 
@@ -43,7 +43,18 @@ async def upload(file: UploadFile = File(...)):
       
     """
   extract_audio(video_path, audio_path)
+  time_series, sample_rate = librosa.load(audio_path)
+  duration = len(time_series) / sample_rate
+  audio_peaks = find_peaks(time_series, sample_rate)
+
   return {"video_name": file.filename, 
           "saved_to": video_path,
-          "audio_array": audio_file}
+          "audio_array": audio_path,
+          "time_series": time_series.shape,
+          "sample_rate": sample_rate,
+          "duration": duration,
+          "first_sample": float(time_series[110250]),
+          "last_sample": float(time_series[-1]),
+          "peaks"}
+
 

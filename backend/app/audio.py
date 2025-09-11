@@ -1,6 +1,6 @@
 from pathlib import Path
 import librosa 
-from moviepy.editor import VideoFileClip
+from moviepy import VideoFileClip
 
 def extract_audio(file_path, output_audio):
   ##Extracts audio track from video file; saves as WAV(WaveForm Audio) file 
@@ -18,4 +18,12 @@ def extract_audio(file_path, output_audio):
     print(f"Error: {e}")
     return False
 
-  
+
+def find_peaks(audio_data, sample_rate):
+
+    try:
+      output_data = librosa.feature.rms(audio_data, frame_length=2048, hop_length=512)
+      return output_data    
+    except Exception as e:
+      print(f"Error: {e}")
+      return 
