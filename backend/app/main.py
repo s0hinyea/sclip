@@ -46,6 +46,9 @@ async def upload(file: UploadFile = File(...)):
   time_series, sample_rate = librosa.load(audio_path)
   duration = len(time_series) / sample_rate
   audio_peaks = find_peaks(time_series, sample_rate)
+  avg_rms = sum(audio_peaks[0]) / len(audio_peaks[0])
+  max_peak = max(audio_peaks[0])
+  
 
   return {"video_name": file.filename, 
           "saved_to": video_path,
@@ -54,7 +57,7 @@ async def upload(file: UploadFile = File(...)):
           "sample_rate": sample_rate,
           "duration": duration,
           "first_sample": float(time_series[110250]),
-          "last_sample": float(time_series[-1]),
-          "peaks"}
-
+          "last_sample": float(time_series[-1]), 
+          "avg_peaks": avg_rms,
+          "max_peak": max_peak}
 
