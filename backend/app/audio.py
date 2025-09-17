@@ -2,7 +2,7 @@ from pathlib import Path
 import librosa 
 from moviepy import VideoFileClip
 
-def extract_audio(file_path, output_audio):
+async def extract_audio(file_path, output_audio):
   ##Extracts audio track from video file; saves as WAV(WaveForm Audio) file 
 
   try: 
@@ -33,3 +33,25 @@ def find_peaks(audio_data, sample_rate):
     except Exception as e:
       print(f"Error: {e}")
       return 
+
+def audio_analysis(audio_path):
+  
+  time_series, sample_rate = librosa.load(audio_path)
+  duration = len(time_series) / sample_rate
+  audio_peaks = find_peaks(time_series, sample_rate)
+  avg_rms = sum(audio_peaks[0]) / len(audio_peaks[0])
+  max_peak = max(audio_peaks[0])
+  threshold = round((avg_rms * 1.5), 3)
+  rms_gunshots = {}
+  for index, peak in enumerate(audio_peaks[0]):
+    if peak >= threshold:
+      rms_gunshots[index] = peak
+
+  timestamp_gunshots = {}
+
+  for index in rms_gunshots.keys():
+    sample_num = index * 512
+    timestamp = sample_num / sample_rate
+    timestamp_gunshots[timestamp] = index
+
+  return timestamp_gunshots, duration
