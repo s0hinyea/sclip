@@ -6,3 +6,4 @@ soundfile
 python-multipart
 ffmpeg-python
 moviepy
+dataclasses
