@@ -13,15 +13,32 @@ def normalize_video_frame(frame, target_width=1920, target_height=1080):
     normalized_frame = cv2.resize(frame, (target_width, target_height))
     return normalized_frame
 
-def load_and_extract(video_path, timestamps, bounds):
+def load_and_extract(video_path, frames_RMS, bounds=0):
 
     clip = cv2.VideoCapture(video_path)
     if not clip.isOpened():
         print("Error: didnt open video")
 
-    for k,v in timestamps.items(): #keys = timestamp , value = RMS
-        
+    for k,v in frames_RMS.items(): #keys = timestamp , value = RMS
+        frame_num = int(k)
+        clip.set(cv2.CAP_PROP_POS_FRAMES, frame_num) #makes the video to be set at a certain frame
 
+        boo, frame = clip.read()
+
+        if boo:
+            BASE_DIR = Path(__file__).resolve().parent.parent.parent
+            image_path = BASE_DIR / "data" / f"{k}.png"
+        
+            normal_frame = normalize_video_frame(frame, 1920, 1080)
+            cv2.namedWindow('Image') #create a window
+            
+            cv2.imshow('Image', normal_frame) #opens window with frame
+            cv2.waitKey(0)# 0 = press any key to close
+            cv2.destroyAllWindows()
+
+            print("Success!")
+
+    return True
 
 0
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,8 +47,7 @@ image_path = BASE_DIR / 'data' / 'image1.png'
 
 image = cv2.imread(image_path)
 normal_image = cv2.resize(image, (1920, 1080))
-cv2.namedWindow('Image') #create a window
-cv2.setMouseCallback('Image', mouse_callback) #connect callback to window
+
 bounds = [(1154, 741), (1141, 756)]
 """
 namedWindow: Creates an empty window (like an empty picture frame)
@@ -39,9 +55,7 @@ imshow: Puts an image into that window (like putting a picture in the frame)
 
 """
 
-cv2.imshow('Image', normal_image)
-cv2.waitKey(0)# 0 = press any key to close
-cv2.destroyAllWindows()
+
 
 
     
