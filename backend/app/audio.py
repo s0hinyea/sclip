@@ -47,11 +47,13 @@ def audio_analysis(audio_path):
     if peak >= threshold:
       rms_gunshots[index] = peak
 
-  timestamp_gunshots = {}
+  timestamp_RMS = {}
+  frame_RMS = {}
 
   for index in rms_gunshots.keys():
     sample_num = index * 512
     timestamp = sample_num / sample_rate
-    timestamp_gunshots[timestamp] = index
+    timestamp_RMS[timestamp] = index
+    frame_RMS[sample_num] = index 
 
-  return timestamp_gunshots, duration
+  return timestamp_RMS, duration, frame_RMS
