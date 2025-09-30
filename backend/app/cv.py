@@ -25,7 +25,7 @@ def get_roi(frame, x1, y1, x2, y2):
     
     for y in range(len(brightness)):
         for x in range(len(brightness[0])):
-            if brightness[y,x] >= 80:
+            if brightness[y,x] >= 200:
                 count += 1
     
     return count
@@ -42,15 +42,19 @@ def load_and_extract(video_path, frames_RMS, bounds=0):
     clip = cv2.VideoCapture(video_path)
     if not clip.isOpened():
         print("Error: didnt open video")
+    fps = clip.get(cv2.CAP_PROP_FPS) or 30.0
+    
         
     BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
     for k,v in frames_RMS.items(): #keys = timestamp , value = RMS
-        frame_num = int(k)
-        clip.set(cv2.CAP_PROP_POS_FRAMES, frame_num) #makes the video to be set at a certain frame
+        timestamp = float(k)
+        frame_idx = int(round(timestamp * fps))
+
+        clip.set(cv2.CAP_PROP_POS_FRAMES, frame_idx) #makes the video to be set at a certain frame
         
         boo, frame = clip.read()
-
+        
         if boo:
             
             image_path = BASE_DIR / "data" / f"{k}.png"
@@ -64,7 +68,7 @@ def load_and_extract(video_path, frames_RMS, bounds=0):
             #cv2.destroyAllWindows()
             
             num_flashes = get_roi(normal_frame, 1141, 741, 1154, 756)
-            print(f"Frame Num: {frame_num} with flashes : {num_flashes}")
+            print(f"Frame Num: {frame_idx} with flashes : {num_flashes}")
 
         else:
             return False 
