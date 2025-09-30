@@ -37,8 +37,9 @@ async def upload(file: UploadFile = File(...)):
   await save_file(file, video_path)
   await extract_audio(str(video_path), str(audio_path))
   gunshots, duration, frames = audio_analysis(audio_path)
+  
     
-  success = load_and_extract(video_path, frames)
+  success = load_and_extract(video_path, gunshots)
   
 
   
