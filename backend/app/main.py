@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile 
+from fastapi.middleware.cors import CORSMiddleware
 #import FastAPI: class for creating app instance that we will add routes to
 import os 
 import librosa
@@ -9,6 +10,14 @@ from pathlib import Path
 from cv import load_and_extract
 
 app = FastAPI() 
+
+app.add_middleware(
+  CORSMiddleware,
+  allow_origins=["http://127.0.0.1:8000", "http://localhost:8000", "*"],
+  allow_credentials=True,
+  allow_methods=["*"],
+  allow_headers=["*"],
+)
 
 @app.get("/health")
 async def root():
@@ -37,5 +46,6 @@ async def upload(file: UploadFile = File(...)):
   return {
           "Gunshots At" : gunshots,
           "Duration" : duration,
-          "Frames" : success
+          "Frames" : success,
+          "FramesRMS": frames,
   }
