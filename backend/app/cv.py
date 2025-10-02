@@ -13,22 +13,15 @@ def normalize_video_frame(frame, target_width=1920, target_height=1080):
     normalized_frame = cv2.resize(frame, (target_width, target_height))
     return normalized_frame
 
-def get_roi(frame, x1, y1, x2, y2):
+def get_roi(frame, x1, y1):
     
-    roi = frame[y1:y2, x1:x2] # y = rows, x = cols
+    roi = frame[y1,x1] # y = rows, x = cols
+    averageBGR = sum(roi) / len(roi)
+    isBright = averageBGR >= 200 
     
+    return averageBGR, isBright
     
-    brightness = roi.mean(axis=2)
 
-    
-    count = 0 
-    
-    for y in range(len(brightness)):
-        for x in range(len(brightness[0])):
-            if brightness[y,x] >= 200:
-                count += 1
-    
-    return count
     """
     for flash in brightness:
         if int(flash) >= 230:
@@ -42,14 +35,14 @@ def load_and_extract(video_path, frames_RMS, bounds=0):
     clip = cv2.VideoCapture(video_path)
     if not clip.isOpened():
         print("Error: didnt open video")
-    fps = clip.get(cv2.CAP_PROP_FPS) or 30.0
+    fps = clip.get(cv2.CAP_PROP_FPS) or 60.0
     
         
     BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
     for k,v in frames_RMS.items(): #keys = timestamp , value = RMS
-        timestamp = float(k)
-        frame_idx = int(round(timestamp * fps))
+        timestamp = float(k) 
+        frame_idx = (int(round(timestamp * fps))) - 10
 
         clip.set(cv2.CAP_PROP_POS_FRAMES, frame_idx) #makes the video to be set at a certain frame
         
@@ -59,7 +52,7 @@ def load_and_extract(video_path, frames_RMS, bounds=0):
             
             image_path = BASE_DIR / "data" / f"{k}.png"
         
-            normal_frame = normalize_video_frame(frame, 1920, 1080)
+            normal_frame = cv2.resize(frame, (1920, 1080))
             #cv2.namedWindow('Image') #create a window
             
             
@@ -67,13 +60,15 @@ def load_and_extract(video_path, frames_RMS, bounds=0):
             #cv2.waitKey(0)# 0 = press any key to close
             #cv2.destroyAllWindows()
             
-            num_flashes = get_roi(normal_frame, 1141, 741, 1154, 756)
-            print(f"Frame Num: {frame_idx} with flashes : {num_flashes}")
+            luminance, didFlash = get_roi(normal_frame, 1141, 652)
+            print(f"Frame Num: {frame_idx} had brightness: {luminance}. Did it Flash? {didFlash} at Second {k}")
 
         else:
             return False 
  
     return True
+
+
 
 
 """
