@@ -13,13 +13,14 @@ def normalize_video_frame(frame, target_width=1920, target_height=1080):
     normalized_frame = cv2.resize(frame, (target_width, target_height))
     return normalized_frame
 
-def get_roi(frame, x1, y1):
+def get_roi(frame, x, y, threshold=200):
     
-    roi = frame[y1,x1] # y = rows, x = cols
-    averageBGR = sum(roi) / len(roi)
-    isBright = averageBGR >= 200 
-    
-    return averageBGR, isBright
+    bgr = frame[y, x]                       # [B, G, R]
+    avg = float(np.mean(bgr, dtype=np.float32))
+    #using sum on NumPy array of unsigned 8-bit integer (0–255 only)
+    #makes (200 + 200 + 200) / 3 wrap around 256 so they do 600 % 256 before dividing by 3
+    #use np.mean instead and cast dtype to float32
+    return avg, avg >= threshold
     
 
     """
@@ -31,7 +32,8 @@ def get_roi(frame, x1, y1):
     """
 
 def load_and_extract(video_path, frames_RMS, bounds=0):
-
+    
+    muzzle_flashes = {}
     clip = cv2.VideoCapture(video_path)
     if not clip.isOpened():
         print("Error: didnt open video")
@@ -61,12 +63,14 @@ def load_and_extract(video_path, frames_RMS, bounds=0):
             #cv2.destroyAllWindows()
             
             luminance, didFlash = get_roi(normal_frame, 1141, 652)
+            if luminance >= 200:
+                muzzle_flashes[frame_idx] = luminance
             print(f"Frame Num: {frame_idx} had brightness: {luminance}. Did it Flash? {didFlash} at Second {k}")
-
+            return luminance
         else:
             return False 
  
-    return True
+    return muzzle_flashes
 
 
 
