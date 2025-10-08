@@ -1,6 +1,7 @@
 import cv2
 import numpy as np 
 from pathlib import Path
+from utils.ts_to_frame import ts_to_frame
 
 def mouse_callback(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -43,8 +44,7 @@ def load_and_extract(video_path, frames_RMS, bounds=0):
     BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
     for k,v in frames_RMS.items(): #keys = timestamp , value = RMS
-        timestamp = float(k) 
-        frame_idx = (int(round(timestamp * fps))) - 10
+        frame_idx = k
 
         clip.set(cv2.CAP_PROP_POS_FRAMES, frame_idx) #makes the video to be set at a certain frame
         
@@ -65,8 +65,7 @@ def load_and_extract(video_path, frames_RMS, bounds=0):
             luminance, didFlash = get_roi(normal_frame, 1141, 652)
             if luminance >= 200:
                 muzzle_flashes[frame_idx] = luminance
-            print(f"Frame Num: {frame_idx} had brightness: {luminance}. Did it Flash? {didFlash} at Second {k}")
-            return luminance
+                print(f"Frame Num: {frame_idx} had brightness: {luminance} at Second {k}")
         else:
             return False 
  

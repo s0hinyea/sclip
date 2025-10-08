@@ -1,6 +1,8 @@
 from pathlib import Path
 import librosa 
 from moviepy import VideoFileClip
+from utils.ts_to_frame import ts_to_frame
+
 
 async def extract_audio(file_path, output_audio):
   ##Extracts audio track from video file; saves as WAV(WaveForm Audio) file 
@@ -42,18 +44,12 @@ def audio_analysis(audio_path):
   avg_rms = sum(audio_peaks[0]) / len(audio_peaks[0])
   max_peak = max(audio_peaks[0])
   threshold = round((avg_rms * 1.5), 3)
-  rms_gunshots = {}
+  frame_RMS = {}
   for index, peak in enumerate(audio_peaks[0]):
     if peak >= threshold:
-      rms_gunshots[index] = peak
+      sample_num = index * 512
+      timestamp = sample_num / sample_rate
+      ts = ts_to_frame(timestamp)
+      frame_RMS[ts] = peak
 
-  timestamp_RMS = {}
-  frame_RMS = {}
-
-  for index in rms_gunshots.keys():
-    sample_num = index * 512
-    timestamp = sample_num / sample_rate
-    timestamp_RMS[timestamp] = index
-    frame_RMS[sample_num] = index 
-
-  return timestamp_RMS, duration, frame_RMS
+  return frame_RMS, duration, avg_rms, threshold
