@@ -40,8 +40,8 @@ async def upload(file: UploadFile = File(...)):
   
   video_path, audio_path = build_paths(file)
   await save_file(file, video_path)
-  await extract_audio.extract_audio(str(video_path), str(audio_path))
-  frames_RMS, duration, avgRms, tresh = audio_analysis.audio_analysis(audio_path)
+  await extract_audio(str(video_path), str(audio_path))
+  frames_RMS, duration, avgRms, tresh = audio_analysis(audio_path)
   
     
   bright_frames = muzzle_analysis(video_path, frames_RMS)
