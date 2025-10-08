@@ -2,6 +2,8 @@ import cv2
 import numpy as np 
 from pathlib import Path
 from utils.ts_to_frame import ts_to_frame
+from .get_flashes import get_flashes
+from .normalize_frame import normalize_video_frame
 
 def mouse_callback(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -10,29 +12,8 @@ def mouse_callback(event, x, y, flags, param):
         print(f"Clicked at ({x}, {y})")
         print(f"Pixel BGR values: {pixel}")
 
-def normalize_video_frame(frame, target_width=1920, target_height=1080):
-    normalized_frame = cv2.resize(frame, (target_width, target_height))
-    return normalized_frame
 
-def get_roi(frame, x, y, threshold=200):
-    
-    bgr = frame[y, x]                       # [B, G, R]
-    avg = float(np.mean(bgr, dtype=np.float32))
-    #using sum on NumPy array of unsigned 8-bit integer (0–255 only)
-    #makes (200 + 200 + 200) / 3 wrap around 256 so they do 600 % 256 before dividing by 3
-    #use np.mean instead and cast dtype to float32
-    return avg, avg >= threshold
-    
-
-    """
-    for flash in brightness:
-        if int(flash) >= 230:
-            count += 1
-    
-    return count 
-    """
-
-def load_and_extract(video_path, frames_RMS, bounds=0):
+def muzzle_analysis(video_path, frames_RMS, bounds=0):
     
     muzzle_flashes = {}
     clip = cv2.VideoCapture(video_path)
@@ -62,7 +43,7 @@ def load_and_extract(video_path, frames_RMS, bounds=0):
             #cv2.waitKey(0)# 0 = press any key to close
             #cv2.destroyAllWindows()
             
-            luminance, didFlash = get_roi(normal_frame, 1141, 652)
+            luminance, didFlash = get_flashes(normal_frame, 1141, 652)
             if luminance >= 200:
                 muzzle_flashes[frame_idx] = luminance
                 print(f"Frame Num: {frame_idx} had brightness: {luminance} at Second {k}")
