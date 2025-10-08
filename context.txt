@@ -1,0 +1,49 @@
+Wed, Oct 8th
+Project state
+Backend (FastAPI): /upload saves video, extracts audio, runs audio_analysis, then calls load_and_extract for visual confirmation.
+Audio (librosa):
+Using librosa.feature.rms(y=..., frame_length=2048, hop_length=512) to compute RMS.
+We produce:
+timestamp_RMS: dict {timestamp_seconds → rms_index}
+duration
+frame-based dict (deprecated for CV) — use timestamps instead.
+Thresholding: simple relative threshold (currently avg_rms * 1.5) to get candidate gunshot times.
+Vision (OpenCV):
+Frames are normalized to 1920×1080 before analysis.
+We identified a muzzle center near (1141, 652) on normalized frames from test images.
+We built a pixel/ROI inspection tool backend/app/testPixels.py to click and read (x, y, BGR).
+We added a frame viewer show_frame (timestamp → frame) earlier; keep a similar helper locally if removed.
+Key fixes made
+Audio→Video mapping bug fixed conceptually:
+Don’t use audio sample indices as frame indices.
+Correct formula: frame_idx = round(timestamp_seconds * fps) (fps=60 for your clips). We also subtract an offset (see below).
+Uint8 overflow bug:
+Using sum(roi)/len(roi) on uint8 can overflow; switched to np.mean(..., dtype=np.float32) or grayscale conversion
+
+Current detection flow (MVP)
+Audio: get candidate timestamps where RMS exceeds threshold.
+Video: for each timestamp:
+Convert to frame index at 60 fps.
+Apply a negative offset (~0.18 s = ~11 frames) because visual muzzle flash precedes audio by ~10–12 frames.
+Optionally search a small window ±3 frames around adjusted index.
+Normalize frame to 1920×1080.
+Extract ROI around muzzle (either:
+single pixel (1141, 652) for quick checks, or
+center-based ROI using a radius r, e.g., 30 → ~61×61).
+Convert ROI to grayscale (cv2.cvtColor(..., COLOR_BGR2GRAY)).
+Count bright pixels: (gray >= 190).sum() (tune 180–210).
+Confirm gunshot if bright_count exceeds small threshold (e.g., >10).
+
+Known gotchas
+GUI in server code:
+Avoid cv2.imshow/waitKey in FastAPI routes; use headless processing only.
+Keep GUI tools (testPixels.py, frame viewers) as separate local scripts.
+Bounds consistency:
+Your bounds/coordinates must match the normalized resolution you use (we’re using 1920×1080).
+A single pixel is brittle; prefer a small ROI centered at your calibrated point.
+Offset:
+Visual flash leads audio by ~10–12 frames at 60 fps (~0.17–0.20 s). Use a tunable offset_s (start 0.18) when mapping timestamps → video frames.
+What’s working
+Upload route runs end-to-end and logs per-candidate-frame brightness.
+testPixels.py lets you resize to 1920×1080, click, and read BGR at normalized coordinates.
+We verified bright muzzle pixels near (1141, 652) produce grayscale/means > 200.
