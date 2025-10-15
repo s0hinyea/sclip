@@ -23,14 +23,17 @@ export default function App() {
   }
 
   function handleDragOver(e){
-    e.preventDefault();
-
+    e.preventDefault(); //prevents browswers default handling of files
+    //such as file opening (new tabs and such)
+   
   }
 
   const handleDrop = (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     setNewFile(file);
+    setIsDragOver(false);
+
     console.log("Got File!");
   }
 
@@ -57,8 +60,9 @@ export default function App() {
               onDragEnter={handleDragEnter}
               onDragLeave={handleDragLeave}
               onDragOver={handleDragOver}
+              onDrop={handleDrop}
             >
-              <input onChange={handleFileSelect} type='file' id='file' ref={inputFile} style={{display: 'none'}}/>
+              <input onChange={handleFileSelect} type='file' id='file' ref={inputFile} style={{display: 'none'}}/> 
               <div className="upload-icon">📁</div>
               <p className="upload-text">Drop your video here or click to browse</p>
               <p className="upload-hint">Supports MP4, AVI, MOV files</p>
