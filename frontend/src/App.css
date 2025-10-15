@@ -78,6 +78,14 @@ body {
   box-shadow: 0 8px 25px rgba(255, 0, 0, 0.2);
 }
 
+/* Drag states */
+.upload-box.drag-over {
+  border-color: #ff6666;
+  background-color: rgba(139, 0, 0, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(255, 0, 0, 0.4);
+}
+
 .upload-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
