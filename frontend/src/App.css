@@ -105,6 +105,12 @@ body {
   color: #888888;
 }
 
+.upload-text,
+.upload-icon,
+.upload-hint {
+  pointer-events: none;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-title {
