@@ -1,11 +1,25 @@
 import './App.css';
 import { useState, useRef } from 'react';
+import { uploadFile } from './utils/processFile'
 
 export default function App() {
   const [newFile, setNewFile] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const inputFile = useRef(null)
+
+
+  const getFileData = () => {
+
+    try{
+
+      let fileData = uploadFile(newFile);
+      console.log("Duration of video: ", fileData); 
+
+    } catch (error) {
+      console.log("No Duration received");
+    }
+  }
 
   const openBrowse = () => {
     inputFile.current.click();
@@ -17,6 +31,7 @@ export default function App() {
     try{  
       setNewFile(e.target.files[0]);
       console.log("Got File!");
+      getFileData()
     } catch(error) {
       console.log("File Upload Error:", error);
     }
@@ -32,8 +47,8 @@ export default function App() {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     setNewFile(file);
+    getFileData()
     setIsDragOver(false);
-
     console.log("Got File!");
   }
 
