@@ -9,15 +9,15 @@ export default function App() {
   const inputFile = useRef(null)
 
 
-  const getFileData = () => {
+  const getFileData = async(f) => {
 
     try{
-
-      let fileData = uploadFile(newFile);
+    
+      let fileData = await uploadFile(f);
       console.log("Duration of video: ", fileData); 
 
     } catch (error) {
-      console.log("No Duration received");
+      console.log("No Duration received", error);
     }
   }
 
@@ -27,11 +27,16 @@ export default function App() {
   }
 
   
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async(e) => {
     try{  
-      setNewFile(e.target.files[0]);
+      const f = e.target.files[0]
+      setNewFile(f);
       console.log("Got File!");
-      getFileData()
+
+      await getFileData(f)
+
+      if (inputFile.current) inputFile.current.value = '';
+
     } catch(error) {
       console.log("File Upload Error:", error);
     }
@@ -43,11 +48,11 @@ export default function App() {
    
   }
 
-  const handleDrop = (e) => {
+  const handleDrop = async(e) => {
     e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    setNewFile(file);
-    getFileData()
+    const f = e.dataTransfer.files[0];
+    setNewFile(f);
+    await getFileData(f);
     setIsDragOver(false);
     console.log("Got File!");
   }

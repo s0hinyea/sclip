@@ -7,14 +7,16 @@ export const uploadFile = async (file) => {
   
   formData.append("file", file);
 
-  //metadata
-  formData.append("title", "test video");
+
 
   try{
+
+    console.log('File being sent:', file);
+    console.log('File name:', file?.name);
+    console.log('File type:', file?.type);
    
     const response = await axios.post(API_URL, formData);
-
-    const data = await response.json();
+    const data = response.data
     
     if ("Duration" in data){
     console.log(data.duration)}
