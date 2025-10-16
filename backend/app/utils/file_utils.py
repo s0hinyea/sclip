@@ -4,7 +4,7 @@ def build_paths(file):
   
   BASE_DIR = Path(__file__).resolve().parent.parent.parent
   video_path = BASE_DIR / "data" / file.filename
-  audio_path = BASE_DIR / "data" / "sample.wav"
+  audio_path = BASE_DIR / "data" / f"{len(file.filename)}.wav"
   return video_path, audio_path
    #the filepath: we will save it to the data folder with its original filename
 
