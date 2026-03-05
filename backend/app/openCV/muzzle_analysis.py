@@ -34,8 +34,6 @@ def muzzle_analysis(video_path, frames_RMS, bounds=0):
         if boo:
             
             image_path = BASE_DIR / "data" / f"{k}.png"
-        
-            normal_frame = cv2.resize(frame, (1920, 1080))
             #cv2.namedWindow('Image') #create a window
             
             
@@ -43,7 +41,9 @@ def muzzle_analysis(video_path, frames_RMS, bounds=0):
             #cv2.waitKey(0)# 0 = press any key to close
             #cv2.destroyAllWindows()
             
-            luminance, didFlash = get_flashes(normal_frame, 1141, 652)
+            d1, d2, d3 = np.shape(frame)
+            
+            luminance, didFlash = get_flashes(frame, int(d2 * 0.5942), int(d1 * 0.6037))
             if luminance >= 200:
                 muzzle_flashes[frame_idx] = luminance
                 print(f"Frame Num: {frame_idx} had brightness: {luminance} at Second {k}")
