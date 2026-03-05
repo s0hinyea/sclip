@@ -5,8 +5,12 @@ import os
 import librosa
 from moviepy import VideoFileClip
 
-from audio import extract_audio, find_peaks, audio_analysis
-from openCV import get_flashes, normalize_video_frame, muzzle_analysis
+from audio.extract_audio import extract_audio
+from audio.find_peaks import find_peaks
+from audio.audio_analysis import audio_analysis
+from openCV.get_flashes import get_flashes
+from openCV.normalize_frame import normalize_video_frame
+from openCV.muzzle_analysis import muzzle_analysis
 
 from utils.file_utils import build_paths, save_file
 from pathlib import Path
