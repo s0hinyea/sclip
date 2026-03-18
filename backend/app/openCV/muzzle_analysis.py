@@ -34,12 +34,6 @@ def muzzle_analysis(video_path, frames_RMS, bounds=0):
         if boo:
             
             image_path = BASE_DIR / "data" / f"{k}.png"
-            #cv2.namedWindow('Image') #create a window
-            
-            
-            #cv2.imshow('Image', normal_frame) #opens window with frame
-            #cv2.waitKey(0)# 0 = press any key to close
-            #cv2.destroyAllWindows()
             
             d1, d2, d3 = np.shape(frame)
             
