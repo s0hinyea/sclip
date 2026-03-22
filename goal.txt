@@ -1,0 +1,142 @@
+# Vodder (SClip)
+
+**What SClip Is**
+
+A Valorant clip analysis tool that automatically analyzes gameplay footage and gives players objective performance feedback. The target user is the regular everyday Valorant player who wants to VOD review and understand what they are doing wrong without manually watching their own clips.
+
+---
+
+**The Core Problem It Solves**
+
+Regular players have no way to get objective feedback on their mechanics without a coach or manually reviewing footage themselves. SClip automates that process and surfaces specific, actionable insights.
+
+---
+
+**V1 Scope — One Metric Only**
+
+Movement discipline during shots. The single question V1 answers is: was the player moving when they fired each shot? This is one of the most common mechanical mistakes in Valorant since moving while shooting drastically reduces accuracy.
+
+**V1 Output:**
+
+- Shot timestamps
+- Moving or still classification for each shot
+- A percentage — what portion of shots were fired while moving
+- A visual timeline showing motion score over time with shot markers
+
+---
+
+**How the Detection Pipeline Works**
+
+**Step 1 — Shot Detection (dual signal)**
+
+- Audio: use Librosa to detect gunshot peaks in the audio waveform
+- Visual: detect muzzle flash brightness in the weapon region of the frame
+- Both signals are cross referenced — requiring both reduces false positives
+- Future improvement: move from binary validation to a confidence scoring system
+
+**Step 2 — Movement Detection**
+
+- Extract frames around each shot timestamp
+- Preprocess: resize and convert to grayscale
+- Mask out the HUD and weapon model to avoid false motion signals
+- Use ORB + RANSAC + affine transforms to compensate for mouse/camera rotation
+- Run Farneback optical flow on stabilized frames to measure world movement
+- Compress pixel motion into a single motion score per frame using NumPy
+- Apply exponential moving average to smooth out noise from explosions and flashes
+- Compare motion score against calibrated thresholds to classify moving vs still
+
+---
+
+**Current Tech Stack**
+
+- **Backend:** Python, FastAPI
+- **Computer Vision:** OpenCV
+- **Signal Processing:** Librosa, NumPy
+- **Frontend:** React (migrating from Create React App to Vite)
+- **Audio extraction:** Replacing MoviePy with direct FFmpeg subprocess calls
+
+---
+
+**Current State of the Codebase**
+
+Working prototype exists with:
+
+- FastAPI `/upload` endpoint that accepts video files
+- Audio peak detection via RMS energy thresholding
+- Muzzle flash detection via brightness check in a region of interest
+- Cross validation logic that verifies shots detected by both signals
+- Basic React frontend with drag and drop upload
+
+**Known issues being actively fixed:**
+
+- Hardcoded ROI pixel coordinates — being replaced with resolution-relative coordinates using frame width and height ratios
+- Static RMS threshold (`avg_rms * 1.5`) — fragile, needs to be replaced with `librosa.onset.onset_detect`
+- MoviePy dependency — being replaced with FFmpeg directly
+- No input normalization for varying resolutions and frame rates
+
+---
+
+**Product Vision**
+
+Simple user flow:
+
+1. User uploads a clip or pastes a link
+2. SClip processes it
+3. User gets a clean readable breakdown with timestamps and a motion timeline
+
+No technical knowledge required from the user. The experience needs to feel effortless.
+
+---
+
+**Monetization Plan (down the road)**
+
+- Free tier: basic analysis, limited clips per month
+- Paid tier: unlimited clips, deeper breakdowns, progress tracking over time
+
+---
+
+**V2 Ideas (not building yet)**
+
+- Enemy detection
+- Reaction time metrics
+- Killfeed parsing
+- Aim tracking
+- Headshot detection
+- Engagement analysis
+- Training a custom model on labeled Valorant footage to improve accuracy over rules based detection
+
+---
+
+**Go To Market**
+
+Valorant community is the target. Reddit (r/VALORANT, r/ValorantCompetitive) and Discord servers are the primary channels. The plan is to build one genuinely impressive demo — one clip analyzed well with clean output — and post it to get early organic traction. The community shares useful tools naturally.
+
+---
+
+**Competitive Landscape**
+
+- Tracker.gg — stats only, no video analysis
+- Aimlabs — aim training only, no gameplay analysis
+- Medal.tv / Outplayed — auto clipping, zero performance analysis
+
+The gap is video analysis tied to actual performance feedback. Nobody does this well for Valorant.
+
+---
+
+**What Makes It Hard**
+
+- Valorant HUD changes with patches requiring robust masking
+- Distinguishing player body movement from camera rotation is the core technical challenge
+- Threshold calibration across different maps, weapons, clip qualities, and frame rates
+- Getting to a rules based pipeline that works reliably before introducing any model training
+
+---
+
+**Timeline**
+
+Month 1 — Core pipeline, reliable shot detection via audio
+Month 2 — Movement classification working on standard 1080p clips
+Month 3 — Calibration and edge cases across maps and weapons
+Month 4 — Web interface, deployment, first real users
+
+GITHUB: github.com/s0hinyea/sclip

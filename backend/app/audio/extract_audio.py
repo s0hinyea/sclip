@@ -6,7 +6,7 @@ async def extract_audio(file_path, output_audio):
   try: 
 
     
-    ffmpeg.input(file_path).output(output_audio).run() 
+    ffmpeg.input(file_path).output(output_audio).overwrite_output().run() 
 
     print(f"Extracted audio: {output_audio}")
     return True

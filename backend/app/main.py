@@ -8,7 +8,7 @@ from moviepy import VideoFileClip
 from audio.extract_audio import extract_audio
 from audio.find_peaks import find_peaks
 from audio.audio_analysis import audio_analysis
-from openCV.get_flashes import get_flashes
+from openCV.get_flashes import detect_flash
 from openCV.normalize_frame import normalize_video_frame
 from openCV.muzzle_analysis import muzzle_analysis
 
@@ -49,10 +49,10 @@ async def upload(file: UploadFile = File(...)):
   video_path, audio_path = build_paths(file)
   await save_file(file, video_path)
   await extract_audio(str(video_path), str(audio_path))
-  frames_RMS, duration, avgRms, tresh = audio_analysis(audio_path)
+  frames_RMS, duration = audio_analysis(audio_path)
   
     
-  bright_frames = muzzle_analysis(video_path, frames_RMS)
+  bright_frames = muzzle_analysis(video_path)
   gunshots = verify_gunshots(frames_RMS, bright_frames)
 
   

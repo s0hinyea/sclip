@@ -1,62 +1,57 @@
 import cv2
 import numpy as np 
-from pathlib import Path
-from utils.ts_to_frame import ts_to_frame
-from .get_flashes import get_flashes
-from .normalize_frame import normalize_video_frame
+from .get_flashes import detect_flash
 
-def mouse_callback(event, x, y, flags, param):
-    if event == cv2.EVENT_LBUTTONDOWN:
-        pixel = normal_image[y, x] #Since going vertically in a python array is rows
-                            #And going horizontally is columns
-        print(f"Clicked at ({x}, {y})")
-        print(f"Pixel BGR values: {pixel}")
+COOLDOWN_FRAMES = 2  # skip this many frames after a detection to avoid duplicates
 
-
-def muzzle_analysis(video_path, frames_RMS, bounds=0):
+def muzzle_analysis(video_path):
+    """
+    Scan every frame of the video for muzzle flashes independently.
+    Uses brightness delta detection with flashbang rejection.
+    Returns {frame_idx: luminance} for each detected flash.
+    """
     
     muzzle_flashes = {}
-    clip = cv2.VideoCapture(video_path)
+    clip = cv2.VideoCapture(str(video_path))
     if not clip.isOpened():
         print("Error: didnt open video")
+        return muzzle_flashes
+
     fps = clip.get(cv2.CAP_PROP_FPS) or 60.0
-    
-        
-    BASE_DIR = Path(__file__).resolve().parent.parent.parent
+    total_frames = int(clip.get(cv2.CAP_PROP_FRAME_COUNT))
+    print(f"Scanning {total_frames} frames for muzzle flashes (fps={fps})...")
 
-    for k,v in frames_RMS.items(): #keys = timestamp , value = RMS
-        frame_idx = k
+    # Track previous frame brightness for delta comparison
+    prev_roi_brightness = None
+    prev_frame_brightness = None
 
-        clip.set(cv2.CAP_PROP_POS_FRAMES, frame_idx) #makes the video to be set at a certain frame
+    frame_idx = 0
+    while frame_idx < total_frames:
+        clip.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+        ret, frame = clip.read()
         
-        boo, frame = clip.read()
-        
-        if boo:
-            
-            image_path = BASE_DIR / "data" / f"{k}.png"
-            
-            d1, d2, d3 = np.shape(frame)
-            
-            luminance, didFlash = get_flashes(frame, int(d2 * 0.5942), int(d1 * 0.6037))
-            if luminance >= 200:
-                muzzle_flashes[frame_idx] = luminance
-                print(f"Frame Num: {frame_idx} had brightness: {luminance} at Second {k}")
+        if not ret:
+            break
+
+        roi_brightness, frame_brightness, is_flash = detect_flash(
+            frame, prev_roi_brightness, prev_frame_brightness
+        )
+
+        if is_flash:
+            muzzle_flashes[frame_idx] = roi_brightness
+            timestamp = round(frame_idx / fps, 3)
+            print(f"Flash detected — frame {frame_idx} (t={timestamp}s), "
+                  f"ROI brightness: {roi_brightness:.1f}, "
+                  f"delta: {roi_brightness - (prev_roi_brightness or 0):.1f}")
+            frame_idx += COOLDOWN_FRAMES  # skip ahead to avoid counting the same flash
+            # Reset brightness tracking after cooldown skip
+            prev_roi_brightness = None
+            prev_frame_brightness = None
         else:
-            return False 
- 
+            frame_idx += 1
+            prev_roi_brightness = roi_brightness
+            prev_frame_brightness = frame_brightness
+
+    clip.release()
+    print(f"Visual scan complete: {len(muzzle_flashes)} flashes detected")
     return muzzle_flashes
-
-
-
-
-"""
-namedWindow: Creates an empty window (like an empty picture frame)
-imshow: Puts an image into that window (like putting a picture in the frame)
-
-"""
-
-
-
-
-    
-

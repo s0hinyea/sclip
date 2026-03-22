@@ -9,5 +9,5 @@ def ts_to_frame(timestamp, fps=60.0):
         int: Frame number
     """
     
-    frame_number = int(round(float(timestamp) * fps)) - 10
+    frame_number = int(round(float(timestamp) * fps))
     return max(0, frame_number)  
