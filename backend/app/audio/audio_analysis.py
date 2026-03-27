@@ -1,5 +1,5 @@
 import librosa 
-from utils.ts_to_frame import ts_to_frame
+from app.utils.ts_to_frame import ts_to_frame
 from .find_peaks import find_peaks
 
 def audio_analysis(audio_path):
