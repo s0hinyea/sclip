@@ -83,7 +83,6 @@ export default function App() {
               onDrop={handleDrop}
             >
               <input onChange={handleFileSelect} type='file' id='file' ref={inputFile} style={{display: 'none'}}/> 
-              <div className="upload-icon">📁</div>
               <p className="upload-text">Drop your video here or click to browse</p>
               <p className="upload-hint">Supports MP4, AVI, MOV files</p>
             </div>
