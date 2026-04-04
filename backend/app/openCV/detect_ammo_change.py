@@ -34,9 +34,11 @@ def extract_ammo_roi(frame):
     roi = frame[y1:y2, x1:x2]
     gray_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
     
-    # Binary Thresholding: Any pixel brighter than 200 becomes solid white (255)
-    # Everything else (the translucent background, map, sky) becomes solid black (0)
-    _, binary_roi = cv2.threshold(gray_roi, 200, 255, cv2.THRESH_BINARY)
+    # Binary Thresholding: The text is pure white (255) or red (low ammo, ~226).
+    # The translucent map background normally hovers around 50-100.
+    # A threshold of 150 safely captures both white and red text cleanly 
+    # without shredding the font anti-aliasing, while still deleting the background.
+    _, binary_roi = cv2.threshold(gray_roi, 150, 255, cv2.THRESH_BINARY)
     
     return binary_roi
 
