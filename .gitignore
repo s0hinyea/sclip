@@ -1,2 +1,31 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temp/scratch files
 context.txt
 steps.md
+
+# Large binary data (videos tracked via separate mechanism)
+*.mp4
+
+# Debug images (keep experiments/ scripts, ignore generated PNGs)
+backend/data/debug_*.png
+backend/experiments/debug_*.png
+
+# Expo
+frontend/.expo/
